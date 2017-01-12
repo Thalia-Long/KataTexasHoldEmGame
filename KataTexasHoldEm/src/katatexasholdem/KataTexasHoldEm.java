@@ -4,12 +4,8 @@ Reference to this kata game can be found here: http://codingdojo.org/cgi-bin/ind
  */
 package katatexasholdem;
 
-import java.io.IOException;
 import java.util.Scanner;
-import java.lang.*;
-import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 
 /**
@@ -23,19 +19,19 @@ public class KataTexasHoldEm {
         KataTexasHoldEm KTHE = new KataTexasHoldEm();
         String teamWin = null;
         String wInput, bInput;
-        int whiteCards[] = new int[5];
-        char whiteSuits[] = new char[5];
-        int blackCards[] = new int[5];
-        char blackSuits[] = new char[5];
-        int remainingValue = 0;
-        int whiteMaxFrequency = 0, blackMaxFrequency = 0;
-        int whiteSecondMaxFrequency = 0, blackSecondMaxFrequency = 0;
-        int whiteMaxValue = 0, blackMaxValue = 0;
-        int whiteSecondMaxValue = 0, blackSecondMaxValue = 0;
-        int whiteRank = 0, blackRank = 0;
+        int whiteCards[];
+        char whiteSuits[];
+        int blackCards[];
+        char blackSuits[];
+        int[] remainingValue;
+        int whiteMaxFrequency, blackMaxFrequency;
+        int whiteSecondMaxFrequency, blackSecondMaxFrequency;
+        int whiteMaxValue, blackMaxValue;
+        int whiteSecondMaxValue, blackSecondMaxValue;
+        int whiteRank, blackRank;
         boolean whiteIsFlush, blackIsFlush;
-        HashMap<Integer, Integer> whiteCardsFrequency = new HashMap<>();
-        HashMap<Integer, Integer> blackCardsFrequency = new HashMap<>();
+        HashMap<Integer, Integer> whiteCardsFrequency;
+        HashMap<Integer, Integer> blackCardsFrequency;
         final int HIGH_CARD = 1,
                 PAIR = 2,
                 TWO_PAIR = 3,
@@ -46,42 +42,58 @@ public class KataTexasHoldEm {
                 FOUR_OF_AKIND = 8,
                 STRAIGHT_FLUSH = 9;
 
-        //Evaluate the white hand
+        /**
+         * Evaluate the white hand
+         */
         System.out.println("Please enter the cards for White Hand: ");
         wInput = KTHE.GetInput();
-        whiteCards = KTHE.ConvertToArrayOfValues(wInput);
+        whiteCards = KTHE.convertToArrayOfValues(wInput);
         whiteSuits = KTHE.convertToArrayOfSuits(wInput);
-        Arrays.sort(whiteCards);
-        whiteIsFlush = KTHE.EvaluatePokerSuits(whiteSuits);
-        whiteCardsFrequency = KTHE.ConvertCardsArrayToHashMap(whiteCards);
-        whiteRank = KTHE.EvaluatePokerCards(whiteCards, whiteSuits, whiteCardsFrequency);
 
-        //Evaluate the black hand
+        Arrays.sort(whiteCards);
+        whiteIsFlush = KTHE.evaluatePokerSuits(whiteSuits);
+        whiteCardsFrequency = KTHE.convertCardsArrayToHashMap(whiteCards);
+        whiteRank = KTHE.evaluatePokerCards(whiteCards, whiteSuits, whiteCardsFrequency);
+
+        /**
+         * Evaluate the white hand
+         */
         System.out.println("Please enter the cards for Black Hand: ");
         bInput = KTHE.GetInput();
-        blackCards = KTHE.ConvertToArrayOfValues(bInput);
+        blackCards = KTHE.convertToArrayOfValues(bInput);
         blackSuits = KTHE.convertToArrayOfSuits(bInput);
         Arrays.sort(blackCards);
-        blackIsFlush = KTHE.EvaluatePokerSuits(blackSuits);
-        blackCardsFrequency = KTHE.ConvertCardsArrayToHashMap(whiteCards);
-        blackRank = KTHE.EvaluatePokerCards(whiteCards, whiteSuits, whiteCardsFrequency);
+        blackIsFlush = KTHE.evaluatePokerSuits(blackSuits);
+        blackCardsFrequency = KTHE.convertCardsArrayToHashMap(blackCards);
+        blackRank = KTHE.evaluatePokerCards(blackCards, blackSuits, blackCardsFrequency);
 
         //compare the single cards if their ranks are equal
         remainingValue = KTHE.highCardComparation(whiteCards, blackCards);
         //Compare two hands to see which hand wins
         if (whiteRank > blackRank) {
-            teamWin = "white wins";
+            teamWin = "white wins with " + KTHE.rankToString(whiteRank);
         }
         if (whiteRank < blackRank) {
-            teamWin = "black wins";
+            teamWin = "black wins with " + KTHE.rankToString(blackRank);
         } else {
             if (whiteRank == HIGH_CARD && blackRank == HIGH_CARD) {
-                switch (remainingValue) {
+                switch (remainingValue[0]) {
                     case 0:
-                        teamWin = "white wins";
+                        if (remainingValue[1] > 10) {
+
+                            teamWin = "white wins - with high card: " + KTHE.stringValueCards(remainingValue[1]);
+                        } else {
+                            teamWin = "white wins - with high card: " + remainingValue[1];
+                        }
                         break;
                     case 1:
-                        teamWin = "black wins";
+                        if (remainingValue[1] > 10) {
+
+                            teamWin = "black wins - with high card: " + KTHE.stringValueCards(remainingValue[1]);
+                        } else {
+                            teamWin = "black wins - with high card: " + remainingValue[1];
+                        }
+
                         break;
                     default:
                         teamWin = "tie";
@@ -96,24 +108,36 @@ public class KataTexasHoldEm {
                 blackSecondMaxValue = KTHE.secondMaxValue(blackCardsFrequency, 2);
 
                 if (whiteMaxValue > blackMaxValue) {
-                    teamWin = "white wins";
-                }
-                if (whiteMaxValue < blackMaxValue) {
-                    teamWin = "black wins";
+                    teamWin = "white wins with higher pair of " + whiteMaxValue;
+                } else if (whiteMaxValue < blackMaxValue) {
+                    teamWin = "black wins with higher pair of " + blackMaxValue;
                 } else {
                     if (whiteSecondMaxValue > blackSecondMaxValue) {
-                        teamWin = "white wins";
-                    }
-                    if (whiteSecondMaxValue < blackSecondMaxValue) {
-                        teamWin = "black wins";
+                        teamWin = "white wins with higher card " + whiteSecondMaxValue;
+                    } else if (whiteSecondMaxValue < blackSecondMaxValue) {
+                        teamWin = "black wins with higher card " + whiteSecondMaxValue;
                     } else {
-                        if (remainingValue == 0) {
-                            teamWin = "white wins";
-                        }
-                        if (remainingValue == 1) {
-                            teamWin = "black wins";
-                        } else {
-                            teamWin = "tie";
+                        switch (remainingValue[0]) {
+                            case 0:
+
+                                if (remainingValue[1] > 10) {
+
+                                    teamWin = "white wins - with high card: " + KTHE.stringValueCards(remainingValue[1]);
+                                } else {
+                                    teamWin = "white wins - with high card: " + remainingValue[1];
+                                }
+                                break;
+                            case 1:
+                                if (remainingValue[1] > 10) {
+
+                                    teamWin = "white wins - with high card: " + KTHE.stringValueCards(remainingValue[1]);
+                                } else {
+                                    teamWin = "white wins - with high card: " + remainingValue[1];
+                                }
+                                break;
+                            default:
+                                teamWin = "tie";
+                                break;
                         }
                     }
 
@@ -123,59 +147,97 @@ public class KataTexasHoldEm {
                 whiteMaxValue = KTHE.maxValue(whiteCardsFrequency, 2);
                 blackMaxValue = KTHE.maxValue(blackCardsFrequency, 2);
                 if (whiteMaxValue > blackMaxValue) {
-                    teamWin = "white wins";
-                }
-                if (whiteMaxValue < blackMaxValue) {
-                    teamWin = "black wins";
+                    teamWin = "white wins with higher pair of " + whiteMaxValue;
+                } else if (whiteMaxValue < blackMaxValue) {
+                    teamWin = "black wins with higher pair of " + blackMaxValue;
                 } else {
-                    if (remainingValue == 0) {
-                        teamWin = "white wins";
-                    }
-                    if (remainingValue == 1) {
-                        teamWin = "black wins";
-                    } else {
-                        teamWin = "tie";
+                    switch (remainingValue[0]) {
+                        case 0:
+
+                            if (remainingValue[1] > 10) {
+
+                                teamWin = "white wins - with high card: " + KTHE.stringValueCards(remainingValue[1]);
+                            } else {
+                                teamWin = "white wins - with high card: " + remainingValue[1];
+                            }
+                            break;
+                        case 1:
+                            if (remainingValue[1] > 10) {
+
+                                teamWin = "white wins - with high card: " + KTHE.stringValueCards(remainingValue[1]);
+                            } else {
+                                teamWin = "white wins - with high card: " + remainingValue[1];
+                            }
+                            break;
+                        default:
+                            teamWin = "tie";
+                            break;
                     }
                 }
             }
             if (whiteRank == THREE_OF_AKIND && blackRank == THREE_OF_AKIND) {
                 whiteMaxValue = KTHE.maxValue(whiteCardsFrequency, 3);
-                whiteMaxValue = KTHE.maxValue(whiteCardsFrequency, 3);
+                blackMaxValue = KTHE.maxValue(blackCardsFrequency, 3);
                 if (whiteMaxValue > blackMaxValue) {
-                    teamWin = "white wins";
-                }
-                if (whiteMaxValue < blackMaxValue) {
-                    teamWin = "black wins";
+                    teamWin = "white wins with high card of tripple cards " + whiteMaxValue;
+                } else if (whiteMaxValue < blackMaxValue) {
+                    teamWin = "black winswith high card of tripple cards " + blackMaxValue;
                 } else {
-                    if (remainingValue == 0) {
-                        teamWin = "white wins";
-                    }
-                    if (remainingValue == 1) {
-                        teamWin = "black wins";
-                    } else {
-                        teamWin = "tie";
+                    switch (remainingValue[0]) {
+                        case 0:
+
+                            if (remainingValue[1] > 10) {
+
+                                teamWin = "white wins - with high card: " + KTHE.stringValueCards(remainingValue[1]);
+                            } else {
+                                teamWin = "white wins - with high card: " + remainingValue[1];
+                            }
+                            break;
+                        case 1:
+                            if (remainingValue[1] > 10) {
+
+                                teamWin = "white wins - with high card: " + KTHE.stringValueCards(remainingValue[1]);
+                            } else {
+                                teamWin = "white wins - with high card: " + remainingValue[1];
+                            }
+                            break;
+                        default:
+                            teamWin = "tie";
+                            break;
                     }
                 }
             }
             if (whiteRank == STRAIGHT && blackRank == STRAIGHT) {
-                if (whiteCards[0] > blackCards[0]) {
-                    teamWin = "white wins";
-                }
-                if (whiteCards[0] < blackCards[0]) {
-                    teamWin = "black wins";
+                if (whiteCards[4] > blackCards[4]) {
+                    teamWin = "white wins with higher card: " + whiteCards[4];
+                } else if (whiteCards[4] < blackCards[4]) {
+                    teamWin = "black wins with higher card: " + blackCards[4];
                 } else {
                     teamWin = "tie";
                 }
             }
             if (whiteRank == FLUSH && blackRank == FLUSH) {
-                if (remainingValue == 0) {
-                        teamWin = "white wins";
-                    }
-                    if (remainingValue == 1) {
-                        teamWin = "black wins";
-                    } else {
+                switch (remainingValue[0]) {
+                    case 0:
+                        if (remainingValue[1] > 10) {
+
+                            teamWin = "white wins - with high card: " + KTHE.stringValueCards(remainingValue[1]);
+                        } else {
+                            teamWin = "white wins - with high card: " + remainingValue[1];
+                        }
+                        break;
+                    case 1:
+                        if (remainingValue[1] > 10) {
+
+                            teamWin = "white wins - with high card: " + KTHE.stringValueCards(remainingValue[1]);
+                        } else {
+                            teamWin = "white wins - with high card: " + remainingValue[1];
+                        }
+                        break;
+                    default:
                         teamWin = "tie";
-                    }
+                        break;
+                }
             }
             if (whiteRank == FULL_HOUSE && blackRank == FULL_HOUSE) {
                 whiteMaxValue = KTHE.maxValue(whiteCardsFrequency, 3);
@@ -183,12 +245,17 @@ public class KataTexasHoldEm {
                 whiteSecondMaxValue = KTHE.maxValue(whiteCardsFrequency, 2);
                 blackSecondMaxValue = KTHE.maxValue(blackCardsFrequency, 2);
                 if (whiteMaxValue > blackMaxValue) {
-                    teamWin = "white wins";
-                }
-                if (whiteMaxValue < blackMaxValue) {
-                    teamWin = "black wins";
+                    teamWin = "white wins with higher tripple cards of " + whiteMaxValue;
+                } else if (whiteMaxValue < blackMaxValue) {
+                    teamWin = "black wins with higher tripple cards of " + blackMaxValue;
                 } else {
-                    teamWin = "tie";
+                    if (whiteSecondMaxValue > blackSecondMaxValue) {
+                        teamWin = "white wins with higher double cards of " + whiteSecondMaxValue;
+                    } else if (whiteSecondMaxValue < blackSecondMaxValue) {
+                        teamWin = "black wins with higher double cards of " + blackSecondMaxValue;
+                    } else {
+                        teamWin = "tie";
+                    }
                 }
 
             }
@@ -196,21 +263,19 @@ public class KataTexasHoldEm {
                 whiteMaxValue = KTHE.maxValue(whiteCardsFrequency, 4);
                 blackMaxValue = KTHE.maxValue(blackCardsFrequency, 4);
                 if (whiteMaxValue > blackMaxValue) {
-                    teamWin = "white wins";
-                }
-                if (whiteMaxValue < blackMaxValue) {
-                    teamWin = "black wins";
+                    teamWin = "white wins with the higher quaterble cards of " + whiteMaxValue;
+                } else if (whiteMaxValue < blackMaxValue) {
+                    teamWin = "black wins with the higher quaterble cards of " + blackMaxValue;
                 } else {
                     teamWin = "tie";
                 }
 
             }
             if (whiteRank == STRAIGHT_FLUSH && blackRank == STRAIGHT_FLUSH) {
-                if (whiteCards[0] > blackCards[0]) {
-                    teamWin = "white wins";
-                }
-                if (whiteCards[0] < blackCards[0]) {
-                    teamWin = "black wins";
+                if (whiteCards[4] > blackCards[4]) {
+                    teamWin = "white wins with the higher card: " + whiteCards[4];
+                } else if (whiteCards[4] < blackCards[4]) {
+                    teamWin = "black wins with the higher card: " + blackCards[4];
                 } else {
                     teamWin = "tie";
                 }
@@ -218,79 +283,115 @@ public class KataTexasHoldEm {
         }
         System.out.println(teamWin);
     }
+//Get input from user and validate the input
 
     String GetInput() {
         String input;
         Scanner scanner = new Scanner(System.in);
         input = scanner.nextLine();
-        return input;
-    }
+        input = input.replace(" ", "").trim();
+        int j = input.toCharArray().length;
+        if (j != 10) {
+            System.out.println("You enter incorrect input. Please enter it again: ");
+            input = GetInput();
+        } else {
+            for (int i = 0; i < 10; i++) {
+                char aChar;
+                aChar = input.charAt(i);
+                if ((i % 2) == 0 && "23456789TJQKAtjqka".indexOf(aChar) == -1) {
+                    System.out.println("You enter incorrect input. Card value has to be one of these '2 3 4 5 6 7 8 9 T J Q K A'. Please enter it again: ");
+                    input = GetInput();
+                } else if ((i % 2) == 1 && "CDHScdhs".indexOf(aChar) == -1) {
+                    System.out.println("You enter incorrect input. Card suit has to be one of these 'C D H S'. Please enter it again: ");
+                    input = GetInput();
 
-    int[] ConvertToArrayOfValues(String input) {
-        int[] valueCards = new int[5];
-        int n = 0;
-
-        for (char c : input.toCharArray()) {
-
-            if (Character.isDigit(c) == true) {
-
-                int k = Character.getNumericValue(c);
-                //Check if the digit is number 10
-                if (k == 1) {
-                    char m = input.charAt(n + 1);
-                    if (Character.isDigit(m)) {
-                        k = 10;
-                        n = n + 1;
-                    }
                 }
-                valueCards[n] = k;
-                n = n + 1;
-                continue;
-
-            }
-            if (c == 'T' || c == 't') {
-                valueCards[n] = 11;
-                n = n + 1;
-                continue;
-
-            }
-            if (c == 'J' || c == 'j') {
-                valueCards[n] = 12;
-                n = n + 1;
-                continue;
-            }
-            if (c == 'Q' || c == 'q') {
-                valueCards[n] = 13;
-                n = n + 1;
-                continue;
-            }
-            if (c == 'K' || c == 'k') {
-                valueCards[n] = 14;
-                n = n + 1;
-                continue;
-            }
-            if (c == 'A' || c == 'a') {
-                valueCards[n] = 15;
-                n = n + 1;
             }
         }
+        return input;
+    }
+//Convert the input to array of value cards. Such as 2 3 4 5 6
+
+    int[] convertToArrayOfValues(String in) {
+        int[] valueCards = new int[5];
+        int n = 0;
+        String input;
+        input = in.replace(" ", "").trim();
+        int j = input.toCharArray().length;
+        if (j != 10) {
+            System.out.println("You enter incorrect input. Please enter it again: ");
+            input = GetInput();
+            valueCards = convertToArrayOfValues(input);
+
+        } else {
+            for (char a : input.toCharArray()) {
+
+                if (Character.isDigit(a) == true) {
+
+                    int k = Character.getNumericValue(a);
+                    valueCards[n] = k;
+                    n = n + 1;
+                    continue;
+
+                }
+                if (a == 'T' || a == 't') {
+                    valueCards[n] = 10;
+                    n = n + 1;
+                    continue;
+
+                }
+                if (a == 'J' || a == 'j') {
+                    valueCards[n] = 11;
+                    n = n + 1;
+                    continue;
+                }
+                if (a == 'Q' || a == 'q') {
+                    valueCards[n] = 12;
+                    n = n + 1;
+                    continue;
+                }
+                if (a == 'K' || a == 'k') {
+                    valueCards[n] = 13;
+                    n = n + 1;
+                    continue;
+                }
+                if (a == 'A' || a == 'a') {
+                    valueCards[n] = 14;
+                    n = n + 1;
+                }
+            }
+        }
+
         return valueCards;
     }
+//Convert the input to array of suits such as C D H S
 
-    char[] convertToArrayOfSuits(String input) {
+    char[] convertToArrayOfSuits(String in) {
         int n = 0;
+        String input;
+        input = in.replace(" ", "").trim();
         char[] suits = new char[5];
-        for (char c : input.toCharArray()) {
+        int j = input.toCharArray().length;
+        if (j != 10) {
+            System.out.println("You enter incorrect input. Please enter it again: ");
+            input = GetInput();
+            suits = convertToArrayOfSuits(input);
 
-            if (c == 'C' || c == 'c' || c == 'D' || c == 'd' || c == 'H' || c == 'h' || c == 'S' || c == 's') {
-                suits[n] = c;
-                n = n + 1;
+        } else {
+            for (char a : input.toCharArray()) {
+
+                if (a == 'C' || a == 'c' || a == 'D' || a == 'd' || a == 'H' || a == 'h' || a == 'S' || a == 's') {
+                    suits[n] = a;
+                    n = n + 1;
+
+                }
             }
         }
         return suits;
     }
+// Convert the poker cards to hashmap that contains each unique card and its occurencies
 
-    HashMap<Integer, Integer> ConvertCardsArrayToHashMap(int pokerCards[]) {
+    HashMap<Integer, Integer> convertCardsArrayToHashMap(int pokerCards[]) {
         HashMap<Integer, Integer> cardsFrequency;
         cardsFrequency = new HashMap<>();
         for (int a : pokerCards) {
@@ -303,28 +404,26 @@ public class KataTexasHoldEm {
         return cardsFrequency;
     }
 
-    /**
-     * Determining the rank of a poker hand
-     */
-    int EvaluatePokerCards(int pokerCards[], char pokerSuits[], HashMap<Integer, Integer> cardsFrequency) {
-        int Rank = 0;
+    //Determining the rank of a poker hand
+    int evaluatePokerCards(int pokerCards[], char pokerSuits[], HashMap<Integer, Integer> cardsFrequency) {
+
+        int Rank = 1; //Rank is HIGH CARD by default
         int max;
         int secondMax;
         max = maxFrequency(cardsFrequency);
         secondMax = secondMaxFrequency(cardsFrequency);
 
-        //STRAIGHT 
-        if (pokerCards[0] - pokerCards[4] == 4) {
+        if (pokerCards[4] - pokerCards[0] == 4) {
+            //STRAIGHT
             Rank = 5;
-        } //FLUSH
-        if (EvaluatePokerSuits(pokerSuits) == true) {
+        }
+        if (evaluatePokerSuits(pokerSuits) == true) {
             //FLUSH
             Rank = 6;
-            if (pokerCards[0] - pokerCards[4] == 4) {
+            if (pokerCards[4] - pokerCards[0] == 4) {
                 //STRAIGHT_FLUSH
                 Rank = 9;
             }
-
         }
         if (max == 4) {
             //FOUR_OF_AKIND
@@ -346,18 +445,15 @@ public class KataTexasHoldEm {
         if (max == 2 && cardsFrequency.size() == 4) {
             //PAIR
             Rank = 2;
-        } else {
-            //HIGH_CARD
-            Rank = 1;
         }
 
         return Rank;
     }
     //Determining if a poker hand has Flush rank
 
-    boolean EvaluatePokerSuits(char suits[]) {
+    boolean evaluatePokerSuits(char suits[]) {
         boolean flush = true;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
             if (suits[i] != suits[i + 1]) {
                 flush = false;
                 break;
@@ -366,7 +462,7 @@ public class KataTexasHoldEm {
         return flush;
     }
 
-    //Loop through hashmap to find the maximum count
+    //Find the maximum count in the HashMap that contains the cards, and their frequencies
     int maxFrequency(HashMap<Integer, Integer> cards) {
 
         int maximum = 0;
@@ -378,6 +474,7 @@ public class KataTexasHoldEm {
         return maximum;
     }
 
+    //Find the second maximum count in the HashMap that contains the cards, and their frequencies
     int secondMaxFrequency(HashMap<Integer, Integer> cards) {
         int secondMax = 0;
         int max;
@@ -390,6 +487,7 @@ public class KataTexasHoldEm {
         return secondMax;
 
     }
+//Find the maximum value of their highest rank. For example, the highest value of the , double, tripple cards
 
     int maxValue(HashMap<Integer, Integer> cards, int frequency) {
         int max = 0;
@@ -400,6 +498,7 @@ public class KataTexasHoldEm {
         }
         return max;
     }
+//Find the second maximum value of their highest rank. For example, the highest value of the , double, tripple cards
 
     int secondMaxValue(HashMap<Integer, Integer> cards, int frequency) {
         int secondMax = 0;
@@ -410,65 +509,80 @@ public class KataTexasHoldEm {
         }
         return secondMax;
     }
+//Decide which team wins by comparing their single cards
 
-    int highCardComparation(int whiteCards[], int blackCards[]) {
-        int team = 3;
+    int[] highCardComparation(int whiteCards[], int blackCards[]) {
+        int[] team = new int[2];
         for (int i = 4; i >= 0; i--) {
             if (whiteCards[i] > blackCards[i]) {
-                team = 0;
+                team[0] = 0;
+                team[1] = whiteCards[i];
                 break;
             }
             if (whiteCards[i] < blackCards[i]) {
-                team = 1;
+                team[0] = 1;
+                team[1] = blackCards[i];
                 break;
             } else {
-                team = 2;
+                team[0] = 2;
             }
         }
         return team;
     }
-//I think use the remaining comparation method to compare the high card case
+//Convert to the original J, Q, K, A from their integer values
 
-//     String highCardComparation(int whiteCards[], int blackCards[]) {
-//        String teamWin = null;
-//        if (whiteCards[4] > blackCards[4]) {
-//            teamWin = "white";
-//        }
-//        if (whiteCards[4] < blackCards[4]) {
-//            teamWin = "black";
-//        } else {
-//            if (whiteCards[3] > blackCards[3]) {
-//                teamWin = "white";
-//            }
-//            if (whiteCards[3] < blackCards[3]) {
-//                teamWin = "black";
-//            } else {
-//                if (whiteCards[2] > blackCards[2]) {
-//                    teamWin = "white";
-//                }
-//                if (whiteCards[2] < blackCards[2]) {
-//                    teamWin = "black";
-//                } else {
-//                    if (whiteCards[1] > blackCards[1]) {
-//                        teamWin = "white";
-//                    }
-//                    if (whiteCards[1] < blackCards[1]) {
-//                        teamWin = "black";
-//                    } else {
-//                        if (whiteCards[0] > blackCards[0]) {
-//                            teamWin = "white";
-//                        }
-//                        if (whiteCards[0] < blackCards[0]) {
-//                            teamWin = "black";
-//                        } else {
-//                            teamWin = "both";
-//                        }
-//                    }
-//                }
-//            }
-//
-//        }
-//        return teamWin;
-//    }
+    String stringValueCards(int v) {
+        String value = null;
+        switch (v) {
 
+            case 11:
+                value = "Jack";
+                break;
+            case 12:
+                value = "Queen";
+                break;
+            case 13:
+                value = "King";
+                break;
+            case 14:
+                value = "Ace";
+                break;
+        }
+        return value;
+    }
+// Convert the rank of each team to its name for their rank
+
+    String rankToString(int v) {
+        String value = null;
+        switch (v) {
+            case 1:
+                value = "High Card";
+                break;
+            case 2:
+                value = "Pair";
+                break;
+            case 3:
+                value = "Two Pair";
+                break;
+            case 4:
+                value = "Three of A Kind";
+                break;
+            case 5:
+                value = "Straight";
+                break;
+            case 6:
+                value = "Flush";
+                break;
+            case 7:
+                value = "Full House";
+                break;
+            case 8:
+                value = "Four of A Kind";
+                break;
+            case 9:
+                value = "Straight Flush";
+                break;
+        }
+        return value;
+    }
 }
